@@ -1,5 +1,6 @@
 package com.fedd.quickpizza;
 
+import static us.abstracta.jmeter.javadsl.JmeterDsl.csvDataSet;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.httpSampler;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.jsr223PostProcessor;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.jsr223PreProcessor;
@@ -23,6 +24,7 @@ public class PerformanceTest {
   @Test
   public DslTestPlan test() throws IOException {
     return testPlan(
+        csvDataSet("src\\test\\java\\com\\fedd\\quickpizza\\env.csv"),
         vars()
             .set("BASE_URL_1", "quickpizza.grafana.com"),
         threadGroup(1, 1,
@@ -56,9 +58,11 @@ public class PerformanceTest {
             .post(
                 "{\"maxCaloriesPerSlice\":1000,\"mustBeVegetarian\":false,\"excludedIngredients\":[],\"excludedTools\":[],\"maxNumberOfToppings\":5,\"minNumberOfToppings\":2,\"customName\":\"\"}",
                 ContentType.APPLICATION_JSON)
-            .header("Authorization", "Token ${AUTH_TOKEN}"),
+            .header("Authorization", "Token ${AUTH_TOKEN}")
+            .children(
+                Extractors.pizzaId()),
         httpSampler("Ratings", "https://${BASE_URL_1}/api/ratings")
-            .post("{\"pizza_id\":753,\"stars\":5}", ContentType.APPLICATION_JSON)
+            .post("{\"pizza_id\":${pizza_id},\"stars\":5}", ContentType.APPLICATION_JSON)
             .children(
                 jsr223PostProcessor("if (prev.responseCode == '401') { prev.successful = true }")))
         .generateParentSample();
@@ -75,7 +79,7 @@ public class PerformanceTest {
         httpSampler("Users_token_login",
             "https://${BASE_URL_1}/api/users/token/login?set_cookie=true")
             .post(
-                "{\"username\":\"studio-user\",\"password\":\"k6studiorocks\",\"csrf\":\"${csrf_token}\"}",
+                "{\"username\":\"${username}\",\"password\":\"${password}\",\"csrf\":\"${csrf_token}\"}",
                 ContentType.APPLICATION_JSON)
             .children(Extractors.token()),
         httpSampler("Ratings", "https://${BASE_URL_1}/api/ratings")).generateParentSample();
@@ -90,13 +94,13 @@ public class PerformanceTest {
             .header("Authorization", "Token ${token}"),
         httpSampler("Pizza", "https://${BASE_URL_1}/api/pizza")
             .post(
-                "{\"maxCaloriesPerSlice\":1000,\"mustBeVegetarian\":false,\"excludedIngredients\":[],\"excludedTools\":[],\"maxNumberOfToppings\":5,\"minNumberOfToppings\":2,\"customName\":\"testedpizza\"}",
+                "{\"maxCaloriesPerSlice\":1000,\"mustBeVegetarian\":false,\"excludedIngredients\":[],\"excludedTools\":[],\"maxNumberOfToppings\":5,\"minNumberOfToppings\":2,\"customName\":\"${customName}\"}",
                 ContentType.APPLICATION_JSON)
             .header("Authorization", "Token ${token}")
             .children(
                 Extractors.pizzaId()),
         httpSampler("Ratings", "https://${BASE_URL_1}/api/ratings")
-            .post("{\"pizza_id\":${pizza_id},\"stars\":5}", ContentType.APPLICATION_JSON))
+            .post("{\"pizza_id\":${pizza_id},\"stars\":4}", ContentType.APPLICATION_JSON))
         .generateParentSample();
   }
 }
