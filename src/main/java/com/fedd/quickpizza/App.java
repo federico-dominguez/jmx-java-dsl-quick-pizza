@@ -1,4 +1,4 @@
-package com.fedd.salesforce;
+package com.fedd.quickpizza;
 
 public class App {
     public static void main(String[] args) {

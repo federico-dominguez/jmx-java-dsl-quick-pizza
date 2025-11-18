@@ -1,4 +1,4 @@
-package com.fedd.salesforce;
+package com.fedd.quickpizza;
 
 import static us.abstracta.jmeter.javadsl.JmeterDsl.boundaryExtractor;
 import static us.abstracta.jmeter.javadsl.JmeterDsl.httpAuth;

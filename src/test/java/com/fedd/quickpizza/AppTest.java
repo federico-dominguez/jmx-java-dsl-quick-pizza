@@ -1,4 +1,4 @@
-package com.fedd.salesforce;
+package com.fedd.quickpizza;
 
 import us.abstracta.jmeter.javadsl.core.DslTestPlan;
 
